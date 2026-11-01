@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Коллекция рецептов - Недокушева ДВ</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Onest:wght@400;500&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- шапка, data-section = id раздела, который покажет кнопка -->
+  <header class="header">
+    <a class="logo" href="#">Книга рецептов</a>
+    <nav class="nav">
+      <button class="active" data-section="recipes">Рецепты</button>
+      <button data-section="add">Добавить рецепт</button>
+      <button data-section="favorites">Избранное (<span id="fav-count">0</span>)</button>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- список рецептов и фильтры-->
+    <section class="section" id="recipes">
+      <h1>Рецепты на каждый день</h1>
+
+      <!-- фильтры
+           data-group — к какому фильтру относится кнопка, data-value — её значение -->
+      <div class="filter-bar">
+        <div class="pills">
+          <div class="pill-group" role="group" aria-label="Тип блюда">
+            <button class="pill" data-group="types" data-value="breakfast">Завтрак</button>
+            <button class="pill" data-group="types" data-value="lunch">Обед</button>
+            <button class="pill" data-group="types" data-value="dinner">Ужин</button>
+            <button class="pill" data-group="types" data-value="dessert">Десерт</button>
+          </div>
+          <div class="pill-group" role="group" aria-label="Сложность">
+            <button class="pill" data-group="difficulty" data-value="Легко">Легко</button>
+            <button class="pill" data-group="difficulty" data-value="Средне">Средне</button>
+            <button class="pill" data-group="difficulty" data-value="Сложно">Сложно</button>
+          </div>
+          <div class="pill-group" role="group" aria-label="Время">
+            <button class="pill" data-group="timeRange" data-value="lt30">До 30 минут</button>
+            <button class="pill" data-group="timeRange" data-value="gt60">Больше 1 часа</button>
+          </div>
+        </div>
+
+        <!-- поиск по названию и ингредиентам -->
+        <input type="search" id="search" class="search" placeholder="Название или ингредиент" aria-label="Поиск">
+      </div>
+
+      <!-- слайдер: максимальное время от 5 минут до 5 часов -->
+      <div class="time-filter">
+        <span>Время: <b id="time-output">любое</b></span>
+        <div class="range">
+          <input type="range" id="time-slider" min="5" max="300" step="5" value="300" aria-label="Максимальное время приготовления">
+          <div class="range-labels"><span>5 мин</span><span>5 ч</span></div>
+        </div>
+        <button type="button" class="link-btn" id="reset">Сбросить фильтры</button>
+      </div>
+
+      <p class="muted" id="count"></p>
+      <div class="grid" id="grid"></div>
+      <p class="muted center" id="empty" hidden>Ничего не найдено. Измените фильтры или поиск.</p>
+    </section>
+
+    <!-- Рформа добавления рецепта -->
+    <section class="section hidden" id="add">
+      <h1>Добавить рецепт</h1>
+
+      <form id="recipe-form" novalidate>
+        <div class="field">
+          <label for="name">Название</label>
+          <input type="text" id="name" name="name" placeholder="Например: Шакшука">
+          <small class="error" id="err-name"></small>
+        </div>
+
+        <div class="field">
+          <label for="imageUrl">Фото</label>
+          <input type="text" id="imageUrl" name="imageUrl" placeholder="photos/shakshuka.jpg">
+        </div>
+
+        <div class="two">
+          <div class="field">
+            <label for="time">Время, минут</label>
+            <input type="number" id="time" name="time" min="1" placeholder="25">
+            <small class="error" id="err-time"></small>
+          </div>
+          <div class="field">
+            <label for="difficulty">Сложность</label>
+            <select id="difficulty" name="difficulty">
+              <option value="">Выберите</option>
+              <option>Легко</option>
+              <option>Средне</option>
+              <option>Сложно</option>
+            </select>
+            <small class="error" id="err-difficulty"></small>
+          </div>
+          <div class="field">
+            <label for="type">Тип</label>
+            <select id="type" name="type">
+              <option value="">Выберите</option>
+              <option value="breakfast">Завтрак</option>
+              <option value="lunch">Обед</option>
+              <option value="dinner">Ужин</option>
+              <option value="dessert">Десерт</option>
+            </select>
+            <small class="error" id="err-type"></small>
+          </div>
+        </div>
+
+        <!-- динамические списки: строки добавляет и удаляет JS -->
+        <div class="field">
+          <label>Ингредиенты</label>
+          <div class="list" id="ingredients" data-placeholder="Например: Помидоры, 400 г"></div>
+          <button type="button" class="link-btn" data-add="ingredients">+ Добавить ингредиент</button>
+          <small class="error" id="err-ingredients"></small>
+        </div>
+
+        <div class="field">
+          <label>Шаги приготовления</label>
+          <div class="list" id="steps" data-placeholder="Опишите шаг"></div>
+          <button type="button" class="link-btn" data-add="steps">+ Добавить шаг</button>
+          <small class="error" id="err-steps"></small>
+        </div>
+
+        <button type="submit" class="primary">Сохранить рецепт</button>
+      </form>
+    </section>
+
+    <!-- избранное -->
+    <section class="section hidden" id="favorites">
+      <h1>Избранное</h1>
+      <div class="grid" id="fav-grid"></div>
+      <p class="muted center" id="fav-empty" hidden>Пока пусто</p>
+    </section>
+
+  </main>
+
+  <!-- окно рецепта (содержимое создаёт JS) -->
+  <dialog class="modal" id="modal"></dialog>
+
+  <!-- всплывающее сообщение -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
